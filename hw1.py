@@ -29,7 +29,9 @@ def poland_cases_by_date(day: int, month: int, year: int = 2020) -> int:
     """
     
     # Your code goes here (remove pass)
-    pass
+    year=year%100
+    result = confirmed_cases.loc[confirmed_cases['Country/Region']=='Poland'][f"{month}/{day}/{year}"].values[0]
+    return result
 
 
 def top5_countries_by_date(day: int, month: int, year: int = 2020) -> List[str]:
@@ -49,13 +51,18 @@ def top5_countries_by_date(day: int, month: int, year: int = 2020) -> List[str]:
     """
 
     # Your code goes here (remove pass)
-    pass
+    year=year%100
+    data= f"{month}/{day}/{year}"
+    result = confirmed_cases[["Province/State","Country/Region", data]].groupby("Country/Region").sum().sort_values(by=data, ascending=False).head(5)
+    result=result.index
+    result= list(result)
+    return result
 
-# Function name is wrong, read the pydoc
+
+
 def no_new_cases_count(day: int, month: int, year: int = 2020) -> int:
     """
-    Returns the number of countries/regions where the infection count in a given day
-    was NOT the same as the previous day.
+    Returns the number of countries/regions where the infection count in a given day was the same as the previous day.
 
     Ex.
     >>> no_new_cases_count(11, 2, 2020)
@@ -70,4 +77,25 @@ def no_new_cases_count(day: int, month: int, year: int = 2020) -> int:
     """
     
     # Your code goes here (remove pass)
-    pass
+    year=year%100
+    data= f"{month}/{day}/{year}"
+    
+    nextdate=confirmed_cases.columns
+    datelist =[]
+    for item in nextdate:
+      datelist.append(item)
+      if item==data:
+        break
+    datelist=datelist[4:]
+    date2=datelist[-2]
+    result = confirmed_cases[["Country/Region", date2,data]].groupby("Country/Region").sum()
+    #df['Discounted_Price'] = df.apply(lambda row: row.Cost - (row.Cost * 0.1), axis = 1) 
+    result['Daily increase']= result[data]-result[date2]
+    result=result[["Daily increase"]]
+    number_of_countries=0
+    for item in result["Daily increase"].values:
+      if item == 0:
+        number_of_countries+=1
+
+ 
+    return number_of_countries
